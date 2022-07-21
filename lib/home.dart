@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:reto_mobile/credit_card_controller.dart';
-import 'package:reto_mobile/credit_card_widget.dart';
+import 'package:reto_mobile/controllerProfile.dart';
+import 'package:reto_mobile/cardProfile.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:reto_mobile/imageProfile.dart';
 
 class Home extends StatelessWidget {
-  const Home({Key? key}) : super(key: key);
+  Home({Key? key}) : super(key: key);
+
+  final textControllerName = TextEditingController();
+  final textControllerProfession = TextEditingController();
+  final textControllerDocument = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +27,8 @@ class Home extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
+                ImageProfile(),
+                SizedBox(height: 10),
                 _textFormNameComplete(),
                 SizedBox(height: 10),
                 _textFormProfession(),
@@ -29,9 +37,9 @@ class Home extends StatelessWidget {
                 SizedBox(height: 10),
                 _textFormNumber(),
                 SizedBox(height: 5),
-                _addData("Add"),
+                _addButtonData("Add"),
                 SizedBox(height: 5),
-                _clearData("Clear"),
+                _clearButtonData("Clear"),
                 Divider(),
                 StreamBuilder(
                     stream: controller.creditCardForm.valueChanges,
@@ -53,6 +61,7 @@ class Home extends StatelessWidget {
   Widget _textFormNameComplete() {
     return ReactiveTextField(
       formControlName: 'inputNameComplete',
+      controller: textControllerName,
       validationMessages: (control) =>
           {'required': 'El nombre no puede estar vacío'},
       textCapitalization: TextCapitalization.words,
@@ -82,6 +91,7 @@ class Home extends StatelessWidget {
   Widget _textFormProfession() {
     return ReactiveTextField(
       formControlName: 'inputProfession',
+      controller: textControllerProfession,
       validationMessages: (control) =>
           {'required': 'El nombre no puede estar vacío'},
       textCapitalization: TextCapitalization.words,
@@ -111,26 +121,35 @@ class Home extends StatelessWidget {
   Widget _textFormNumber() {
     return ReactiveTextField(
       formControlName: 'inputDocumentNumber',
-      validationMessages: (control) =>
-          {'required': 'El documento de identidad no puede estar vacío'},
+      controller: textControllerDocument,
+      validationMessages: (control) => {
+        'required': 'El documento de identidad no puede estar vacío',
+        'number': 'El documento de identidad solo puede ser numeros',
+        'minLength': 'El documento de identidad debe tener minimo 7 digitos',
+        'maxLength': 'El documento de identidad debe tener maximo 10 digitos'
+      },
       keyboardType: TextInputType.number,
       inputFormatters: [],
       decoration: InputDecoration(
         border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue),
+            borderSide: BorderSide(color: Colors.orange),
             borderRadius: BorderRadius.circular(
               7.0,
             )),
         enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue),
+            borderSide: BorderSide(color: Colors.orangeAccent),
             borderRadius: BorderRadius.circular(
               7.0,
             )),
         focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 2),
+            borderSide: BorderSide(color: Colors.orange, width: 2),
             borderRadius: BorderRadius.circular(
               7.0,
             )),
+        prefixIcon: Icon(
+          Icons.person,
+          color: Colors.black,
+        ),
         labelStyle: TextStyle(color: Colors.grey[700], fontSize: 15),
         labelText: "Documento de identidad",
       ),
@@ -144,41 +163,38 @@ class Home extends StatelessWidget {
       'Tarjeta de identidad',
       'Numero de pasaporte'
     ];
+    var _hint = '';
     return ReactiveDropdownField<String>(
       formControlName: 'typeDocument',
       validationMessages: (control) =>
           {'required': 'Debe seleccionar una opción de documento'},
-      hint: Text('Seleccione un tipo de documento'),
+      hint: Text(_hint),
       items: _lista.map((String element) {
         return DropdownMenuItem(value: element, child: Text(element));
       }).toList(),
-      /* onChanged: (_value) => {
-        setSta(() {
-          _vista = _value;
-        }
-      }, */
       decoration: InputDecoration(
         border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue),
+            borderSide: BorderSide(color: Colors.orange),
             borderRadius: BorderRadius.circular(
               7.0,
             )),
         enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue),
+            borderSide: BorderSide(color: Colors.orangeAccent),
             borderRadius: BorderRadius.circular(
               7.0,
             )),
         focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 2),
+            borderSide: BorderSide(color: Colors.orange, width: 2),
             borderRadius: BorderRadius.circular(
               7.0,
             )),
         labelStyle: TextStyle(fontSize: 15),
+        labelText: "Tipo de documento",
       ),
     );
   }
 
-  Widget _addData(String text) {
+  Widget _addButtonData(String text) {
     return ElevatedButton.icon(
         onPressed: () {},
         style: ButtonStyle(
@@ -187,9 +203,13 @@ class Home extends StatelessWidget {
         label: Text(text));
   }
 
-  Widget _clearData(String text) {
+  Widget _clearButtonData(String text) {
     return ElevatedButton.icon(
-        onPressed: () {},
+        onPressed: () {
+          textControllerName.clear();
+          textControllerProfession.clear();
+          textControllerDocument.clear();
+        },
         style:
             ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
         icon: Icon(Icons.clear),
